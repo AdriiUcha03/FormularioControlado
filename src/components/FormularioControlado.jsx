@@ -1,7 +1,7 @@
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import Swal from "sweetalert2"
 
-const FormControlado = ({addTodo}) => {
+const FormControlado = ({addTodo, edit}) => {
 
     //Estados por cada input
     // const [title,setTitle] = useState("")
@@ -18,7 +18,19 @@ const FormControlado = ({addTodo}) => {
 
     })
 
-    const {title, description, priority, state} = todo
+    const {title, description, priority, state} = todo 
+
+    //Para comprobar reactivaemente el estado del boton de añadir, guardar cambios
+    const [editingButton, setEditingButton] = useState(false);
+
+    //Utilizo dos ternarios de los vistos en clase en vez de if else que toca ir acostumbrandose xd
+    const handleButtonLabel = () => {
+        return editingButton ? 'Guardar' : 'Añadir';
+      };
+    
+      const handleButtonColor = () => {
+        return editingButton ? 'btn-success' : 'btn-primary';
+      };
 
     const handleSubmit = e =>{
         e.preventDefault()
@@ -39,7 +51,7 @@ const FormControlado = ({addTodo}) => {
             id:Date.now(), //Para poner una id en milisegundos y que tengan diferentes id
             //state: state === "completada"? true:false  //Coversión de boolean state
             state: state == "completada"? true:false
-        })
+        }, setEditingButton(false))
 
         //Reseteamos el formulario
         setTodo({
@@ -49,6 +61,14 @@ const FormControlado = ({addTodo}) => {
         })
     }
 
+    //Cuando el valor de edit to do cambie este lanzara el set todo para el formulario
+    useEffect(() => {
+        //Para evitar que de error porque edit es undefined al principio ya que se ejecuta al incio
+        if(edit) { //Comprobamos que solo se ejecute cuando no sea undefined
+            setEditingButton(true)
+            setTodo(edit)
+        }}, [edit]);
+    
     const handlechange = e =>{
         const {name,type, checked, value} = e.target
         setTodo({
@@ -79,7 +99,7 @@ const FormControlado = ({addTodo}) => {
                 <select
                     name="state"
                     className="form-control mb-2"
-                    value={todo.state}
+                    value={todo.state ? "completada" : "pendiente"}
                     onChange={handlechange}
                 >
                     <option value="pendiente">Pendiente</option>
@@ -99,7 +119,10 @@ const FormControlado = ({addTodo}) => {
                 <br></br>
                 <br></br>
 
-                <button type="submit" className="btn btn-primary">Añadir</button>
+                <button type="submit" 
+                className={`btn ${handleButtonColor()}`}
+                >{handleButtonLabel()}
+                </button>
 
                 <br></br>
                 <br></br>
